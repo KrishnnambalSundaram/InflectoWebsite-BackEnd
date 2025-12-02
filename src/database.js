@@ -1,12 +1,6 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Determine SSL configuration
-// If connecting to a remote server, SSL is often required.
-// We use rejectUnauthorized: false to allow self-signed certificates common in dev/intranets.
-const sslConfig = process.env.DB_HOST !== 'localhost' && process.env.DB_HOST !== '127.0.0.1'
-  ? { rejectUnauthorized: false }
-  : false;
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -14,7 +8,6 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  ssl: sslConfig,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000, // Increased timeout for remote connections
