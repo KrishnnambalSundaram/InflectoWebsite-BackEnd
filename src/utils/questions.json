@@ -1,0 +1,206 @@
+{
+  "c_suite": {
+    "persona": "C-Suite / Decision-Maker",
+    "scoring": [
+      {
+        "id": "cs_q1",
+        "question": "How strategically important is AI to your organization’s growth in the next 2 years????",
+        "type": "single",
+        "options": {
+          "Critical to our core strategy": 4,
+          "Important but not yet a top priority": 3,
+          "Exploring possibilities": 2,
+          "Not yet on the roadmap": 1
+        }
+      },
+      {
+        "id": "cs_q2",
+        "question": "How confident are you in your organization’s ability to scale AI successfully?",
+        "type": "single",
+        "options": {
+          "Very confident – already scaling models": 4,
+          "Moderately confident – pilots underway": 3,
+          "Unsure – early-stage experimentation": 2,
+          "Not confident – no structured pilots yet": 1
+        }
+      },
+      {
+        "id": "cs_q3",
+        "question": "Do you currently measure AI or digital transformation ROI?",
+        "type": "single",
+        "options": {
+          "Yes, measured through enterprise KPIs": 4,
+          "Informally monitored": 3,
+          "Not yet measured": 2,
+          "Unsure": 1
+        }
+      }
+    ],
+    "non_scoring": [
+      {
+        "id": "cs_ns1",
+        "question": "Which strategic business outcomes are you prioritizing?",
+        "type": "multi",
+        "options": [
+          "Efficiency and cost optimization",
+          "Customer experience and personalization",
+          "New product or service innovation",
+          "Compliance, governance, or risk management"
+        ]
+      },
+      {
+        "id": "cs_ns2",
+        "question": "What is the biggest factor slowing down AI adoption today?",
+        "type": "single",
+        "options": [
+          "Lack of internal expertise",
+          "Limited or poor-quality data",
+          "Budget constraints",
+          "Unclear ROI or leadership alignment"
+        ]
+      }
+    ]
+  },
+
+  "manager": {
+    "persona": "Manager / Functional Head",
+    "scoring": [
+      {
+        "id": "mgr_q1",
+        "question": "Which statement best describes your department’s data systems?",
+        "type": "single",
+        "options": {
+          "Mostly manual data entry or spreadsheets": 1,
+          "Partially digital (ERP / CRM)": 2,
+          "We actively use BI / analytics platforms": 3,
+          "We have integrated, governed datasets": 4
+        }
+      },
+      {
+        "id": "mgr_q2",
+        "question": "How would you describe your department’s current AI usage?",
+        "type": "single",
+        "options": {
+          "No exposure yet": 1,
+          "Exploring use cases": 2,
+          "Running AI pilot projects": 3,
+          "Actively using AI tools": 4
+        }
+      }
+    ],
+    "non_scoring": [
+      {
+        "id": "mgr_ns1",
+        "question": "Which processes would benefit most from AI or automation?",
+        "type": "multi",
+        "options": [
+          "Reporting and analytics",
+          "Finance or compliance workflows",
+          "HR / recruitment / performance tracking",
+          "Customer service or support",
+          "Operations"
+        ]
+      },
+      {
+        "id": "mgr_ns2",
+        "question": "What challenges do you face in adopting automation or AI?",
+        "type": "multi",
+        "options": [
+          "Data scattered across systems",
+          "Lack of skilled resources",
+          "Integration with existing systems",
+          "Resistance to change"
+        ]
+      },
+      {
+        "id": "mgr_ns3",
+        "question": "What support would help AI adoption?",
+        "type": "multi",
+        "options": [
+          "Pre-built use cases or templates",
+          "Hands-on training or workshops",
+          "Platform or tool recommendations",
+          "End-to-end implementation help"
+        ]
+      }
+    ]
+  },
+
+  "practitioner": {
+    "persona": "Practitioner / Contributor / Analyst",
+    "scoring": [
+      {
+        "id": "pr_q1",
+        "question": "How automated are the tasks you perform?",
+        "type": "single",
+        "options": {
+          "Completely automated": 4,
+          "Partially automated": 3,
+          "Mostly manual": 2,
+          "Not applicable / unsure": 1
+        }
+      },
+      {
+        "id": "pr_q2",
+        "question": "What is your exposure to AI tools today?",
+        "type": "single",
+        "options": {
+          "Regularly use AI tools in work": 4,
+          "Have tried AI tools": 3,
+          "Only aware conceptually": 2,
+          "Not exposed": 1
+        }
+      },
+      {
+        "id": "pr_q3",
+        "question": "How comfortable are you using AI tools?",
+        "type": "single",
+        "options": {
+          "Very comfortable": 4,
+          "Somewhat comfortable": 3,
+          "Curious but unsure": 2,
+          "Prefer manual processes": 1
+        }
+      }
+    ],
+    "non_scoring": [
+      {
+        "id": "pr_ns1",
+        "question": "What type of information do you work with?",
+        "type": "multi",
+        "options": [
+          "Transaction data",
+          "Documents",
+          "Images/media",
+          "Emails/conversations",
+          "Mostly manual paperwork",
+          "Other"
+        ]
+      },
+      {
+        "id": "pr_ns2",
+        "question": "What tools do you currently use to analyze information or perform your daily tasks?",
+        "type": "multi",
+        "options": [
+          "CRM/ERP",
+          "Spreadsheets",
+          "Automation tools",
+          "BI tools",
+          "Custom tools"
+        ]
+      },
+      {
+        "id": "pr_ns3",
+        "question": "What challenges slow down your productivity?",
+        "type": "multi",
+        "options": [
+          "Manual repetitive tasks",
+          "Skill or training limitations",
+          "Hard-to-use systems",
+          "Manual approvals",
+          "Data access issues"
+        ]
+      }
+    ]
+  }
+}

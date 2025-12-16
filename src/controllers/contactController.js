@@ -6,9 +6,9 @@ exports.addContact = async (req, res) => {
     const { name, email, phone_number, service, message } = req.body;
 
     const result = await pool.query(
-      `INSERT INTO contactus (name, email, phone_number, service, message) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [name, email, phone_number, service, message]
+      `INSERT INTO contactus (name, email, service, message) 
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name, email, service, message]
     );
 
     res.status(201).json({

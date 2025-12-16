@@ -1,8 +1,11 @@
 const express = require("express");
 const cors = require("cors");
+const http = require("http");
 require("dotenv").config();
 
 const contactRoutes = require("./routes/contactRoutes");
+const aiAssessmentRoutes = require("./routes/aiAssessmentRoutes");
+const { initAIReadinessSocket } = require("./controllers/aiAssessmentController");
 
 const app = express();
 
@@ -12,9 +15,14 @@ app.use(express.json());
 
 // Routes
 app.use("/api/contact", contactRoutes);
+app.use("/api/ai", aiAssessmentRoutes);
 
-// Start server
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+const server = http.createServer(app);
+
+initAIReadinessSocket(server);
+
+server.listen(PORT, () => {
+  console.log(` Server running on http://localhost:${PORT}`);
+  console.log(` WebSocket ready at ws://localhost:${PORT}/ws/ai-readiness`);
 });

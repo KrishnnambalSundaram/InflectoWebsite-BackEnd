@@ -1,11 +1,11 @@
 const allowedServices = [
-  "Products For Real-life problems",
-  "Digital Advisory",
-  "AI Enablement",
-  "App Developemnt and Support",
-  "UI/UX Consulting and Revamp",
-  "Performance Tuning",
-  "Business Automation"
+  "Intelligent Experience Engineering",
+  "Digital Reinvention",
+  "FutureCraft Advisory",
+  "AI-First Enterprise Shift",
+  "AI Maturity Assessment",
+  "DAI Labs",
+  "Inflecto ValueSphere"
 ];
 
 const validateService = (req, res, next) => {
