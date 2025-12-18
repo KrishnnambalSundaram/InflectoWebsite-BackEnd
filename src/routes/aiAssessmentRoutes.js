@@ -20,5 +20,8 @@ router.post("/assessment/:id/answer", saveAnswer);
 // POST /api/ai/assessment/:id/finalize -> save score/stage/report
 router.post("/assessment/:id/finalize", finalizeAssessment);
 
+// POST /api/ai/assessment/:id/send-report -> send stored/generated report to email
+router.post("/assessment/:id/send-report", require("../controllers/aiAssessmentController").sendReport);
+
 module.exports = router;
 

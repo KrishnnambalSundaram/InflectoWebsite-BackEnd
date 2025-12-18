@@ -149,7 +149,7 @@ const saveAnswer = async (req, res) => {
 
 const finalizeAssessment = async (req, res) => {
   const { id } = req.params;
-  const { final_score, stage } = req.body || {};
+  const { final_score, stage, email = null, company_name = null, user_name = null } = req.body || {};
   if (!id || final_score === undefined || !stage) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -161,9 +161,12 @@ const finalizeAssessment = async (req, res) => {
       `UPDATE aireadiness
          SET final_score = $1,
              stage = $2,
+             email = COALESCE($3, email),
+             company_name = COALESCE($4, company_name),
+             user_name = COALESCE($5, user_name),
              updated_at = CURRENT_TIMESTAMP
-       WHERE id = $3`,
-      [final_score, stage, id]
+       WHERE id = $6`,
+      [final_score, stage, email, company_name, user_name, id]
     );
 
     // Fetch assessment and answers to return as JSON template payload
@@ -221,6 +224,83 @@ const finalizeAssessment = async (req, res) => {
   } catch (err) {
     console.error("finalizeAssessment error", err);
     return res.status(500).json({ error: "Failed to finalize assessment" });
+  } finally {
+    client.release();
+  }
+};
+
+const sendReport = async (req, res) => {
+  const { id } = req.params;
+  const { email = null, company_name = null, user_name = null } = req.body || {};
+  if (!id || !email) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const client = await pool.connect();
+  try {
+    const assessmentRes = await client.query(
+      `SELECT id, user_name, company_name, email, persona, final_score, stage, report, created_at, updated_at
+         FROM aireadiness
+        WHERE id = $1`,
+      [id]
+    );
+    const assessment = assessmentRes.rows[0];
+    if (!assessment) {
+      return res.status(404).json({ error: "Assessment not found" });
+    }
+
+    const answersRes = await client.query(
+      `SELECT question_id, question, question_type, selected_answer, selected_score, is_scoring, created_at
+         FROM aiquestionnaire
+        WHERE aireadiness_id = $1
+        ORDER BY created_at ASC`,
+      [id]
+    );
+    const answers = answersRes.rows || [];
+
+    let generatedReport = assessment.report || null;
+    if (!generatedReport && openai) {
+      try {
+        const prompt = buildReportJsonPrompt(assessment, answers);
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: "You are an AI readiness consultant. Return ONLY valid JSON." },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.4,
+        });
+        generatedReport = completion.choices?.[0]?.message?.content || generatedReport;
+      } catch (err) {
+        console.error("OpenAI generation failed", err.message);
+      }
+    }
+
+    if (generatedReport) {
+      await client.query(
+        `UPDATE aireadiness
+           SET report = $1,
+               email = COALESCE($2, email),
+               company_name = COALESCE($3, company_name),
+               user_name = COALESCE($4, user_name),
+               updated_at = CURRENT_TIMESTAMP
+         WHERE id = $5`,
+        [generatedReport, email, company_name, user_name, id]
+      );
+    } else {
+      return res.status(500).json({ error: "Report generation unavailable" });
+    }
+
+    // Placeholder: integrate an email service here to send generatedReport as PDF/JSON to `email`.
+
+    return res.json({
+      ok: true,
+      report: generatedReport,
+      assessment: { ...assessment, email, company_name, user_name },
+    });
+  } catch (err) {
+    console.error("sendReport error", err);
+    return res.status(500).json({ error: "Failed to send report" });
   } finally {
     client.release();
   }
@@ -401,5 +481,6 @@ module.exports = {
   createAssessment,
   saveAnswer,
   finalizeAssessment,
+  sendReport,
 };
 
