@@ -10,7 +10,7 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000, // Increased timeout for remote connections
+  connectionTimeoutMillis: 15000, // allow slower remote connections
 });
 
 console.log("Attempting to connect to DB at:", process.env.DB_HOST, "Database:", process.env.DB_NAME);
