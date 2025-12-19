@@ -4,7 +4,7 @@
     "scoring": [
       {
         "id": "cs_q1",
-        "question": "How strategically important is AI to your organization’s growth in the next 2 years????",
+        "question": "How strategically important is AI to your organization’s growth in the next 2 years?",
         "type": "single",
         "options": {
           "Critical to our core strategy": 4,
