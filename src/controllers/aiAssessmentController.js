@@ -1,8 +1,12 @@
 const path = require("path");
 const fs = require("fs");
+require("dotenv").config();
 const { WebSocketServer } = require("ws");
 const pool = require("../database");
 const { OpenAI } = require("openai");
+const nodemailer = require("nodemailer");
+const { buildEmailTemplate } = require("../utils/emailTemplates");
+const { generatePDF } = require("../utils/pdfTemplates");
 
 const questionsPath = path.join(__dirname, "..", "utils", "questions.json");
 const questionsData = JSON.parse(fs.readFileSync(questionsPath, "utf-8"));
@@ -229,6 +233,7 @@ const finalizeAssessment = async (req, res) => {
   }
 };
 
+
 const sendReport = async (req, res) => {
   const { id } = req.params;
   const { email = null, company_name = null, user_name = null } = req.body || {};
@@ -259,22 +264,22 @@ const sendReport = async (req, res) => {
     const answers = answersRes.rows || [];
 
     let generatedReport = assessment.report || null;
-    if (!generatedReport && openai) {
-      try {
-        const prompt = buildReportJsonPrompt(assessment, answers);
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: "You are an AI readiness consultant. Return ONLY valid JSON." },
-            { role: "user", content: prompt },
-          ],
-          temperature: 0.4,
-        });
-        generatedReport = completion.choices?.[0]?.message?.content || generatedReport;
-      } catch (err) {
-        console.error("OpenAI generation failed", err.message);
-      }
-    }
+    // if (!generatedReport && openai) {
+    //   try {
+    //     const prompt = buildReportJsonPrompt(assessment, answers);
+    //     const completion = await openai.chat.completions.create({
+    //       model: "gpt-4o-mini",
+    //       messages: [
+    //         { role: "system", content: "You are an AI readiness consultant. Return ONLY valid JSON." },
+    //         { role: "user", content: prompt },
+    //       ],
+    //       temperature: 0.4,
+    //     });
+    //     generatedReport = completion.choices?.[0]?.message?.content || generatedReport;
+    //   } catch (err) {
+    //     console.error("OpenAI generation failed", err.message);
+    //   }
+    // }
 
     if (generatedReport) {
       await client.query(
@@ -291,13 +296,86 @@ const sendReport = async (req, res) => {
       return res.status(500).json({ error: "Report generation unavailable" });
     }
 
-    // Placeholder: integrate an email service here to send generatedReport as PDF/JSON to `email`.
+    // Send email with report
+    try {
+      // Validate email credentials
+      console.log("📧 Email config check - SMTP_HOST:", process.env.SMTP_HOST);
+      console.log("📧 Email config check - SMTP_USER:", process.env.SMTP_USER ? "✅ Set" : "❌ Missing");
+      console.log("📧 Email config check - SMTP_PASS:", process.env.SMTP_PASS ? "✅ Set" : "❌ Missing");
+      
+      if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.error("❌ SMTP credentials missing. SMTP_USER:", !!process.env.SMTP_USER, "SMTP_PASS:", !!process.env.SMTP_PASS);
+        throw new Error("SMTP credentials not configured. Please set SMTP_USER and SMTP_PASS in .env file");
+      }
 
-    return res.json({
-      ok: true,
-      report: generatedReport,
-      assessment: { ...assessment, email, company_name, user_name },
-    });
+      // Configure nodemailer transporter
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      // Generate PDF
+      const updatedAssessment = { ...assessment, email, company_name, user_name };
+      console.log("📄 Generating PDF...");
+      const pdfBuffer = await generatePDF(generatedReport, updatedAssessment);
+      console.log("✅ PDF generated successfully");
+
+      // Email options with PDF attachment
+      const mailOptions = {
+        from: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@inflectotechnologies.com',
+        to: email,
+        subject: `AI Readiness Assessment Report – ${updatedAssessment.company_name || 'Your Organization'}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px;">
+            <h2 style="color: #5acfd5;">Your AI Readiness Assessment Report is Ready</h2>
+            <p>Dear ${updatedAssessment.user_name || 'User'},</p>
+            <p>Thank you for completing the AI Readiness Assessment. Your detailed report is attached as a PDF.</p>
+            <p><strong>Your Score:</strong> ${updatedAssessment.final_score || 0} / 100</p>
+            <p><strong>Stage:</strong> ${updatedAssessment.stage || 'N/A'}</p>
+            <p>Please find your comprehensive AI Readiness Assessment Report attached to this email.</p>
+            <p>If you have any questions or would like to schedule a consultation, please don't hesitate to reach out.</p>
+            <br>
+            <p>Best regards,<br>Inflecto Technologies</p>
+          </div>
+        `,
+        text: `Your AI Readiness Assessment Report is ready. Score: ${updatedAssessment.final_score || 0}/100, Stage: ${updatedAssessment.stage || 'N/A'}. Please see the attached PDF for the full report.`,
+        attachments: [
+          {
+            filename: `AI_Readiness_Report_${updatedAssessment.company_name || 'Report'}_${Date.now()}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf'
+          }
+        ]
+      };
+
+      // Send email
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`✅ Email with PDF sent successfully to ${email}:`, info.messageId);
+
+      return res.json({
+        ok: true,
+        message: "Report sent successfully",
+        emailSent: true,
+        report: generatedReport,
+        assessment: updatedAssessment,
+      });
+    } catch (emailError) {
+      console.error("❌ Email sending failed:", emailError);
+      // Still return success if report was generated, but log the email error
+      return res.json({
+        ok: true,
+        message: "Report generated but email sending failed",
+        emailSent: false,
+        emailError: emailError.message,
+        report: generatedReport,
+        assessment: { ...assessment, email, company_name, user_name },
+      });
+    }
   } catch (err) {
     console.error("sendReport error", err);
     return res.status(500).json({ error: "Failed to send report" });
@@ -314,6 +392,11 @@ const buildReportJsonPrompt = (assessment, answers) => {
   const observations = scoringAnswers.map((a) => `${a.question}: ${a.selected_answer}`);
   const contextAnswers = nonScoringAnswers.map((a) => `${a.question}: ${a.selected_answer}`);
 
+  // Format the assessment date
+  const assessmentDate = assessment.created_at 
+    ? new Date(assessment.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
   return `
 You are an AI readiness consultant. Generate a short AI Readiness Assessment Report as JSON using the structure below. Return ONLY valid JSON.
 
@@ -323,6 +406,7 @@ Score: ${assessment.final_score}
 Stage: ${assessment.stage}
 Company Name: ${assessment.company_name || ""}
 User Name: ${assessment.user_name || ""}
+Assessment Date: ${assessmentDate}
 Observations: ${JSON.stringify(observations)}
 Context: ${JSON.stringify(contextAnswers)}
 
@@ -330,7 +414,7 @@ JSON structure (all fields required):
 {
   "title": "AI Readiness Assessment Report – {{Persona}}",
   "prepared_for": "{{User_Name}}",
-  "date": "{{Date}}",
+  "date": "${assessmentDate}",
   "score_section": {
     "score": "{{Score}}",
     "stage": "{{Stage}}",

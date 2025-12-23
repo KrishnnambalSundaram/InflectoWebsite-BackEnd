@@ -4,6 +4,7 @@ const {
   createAssessment,
   saveAnswer,
   finalizeAssessment,
+  sendReport,
 } = require("../controllers/aiAssessmentController");
 
 const router = express.Router();
@@ -21,7 +22,7 @@ router.post("/assessment/:id/answer", saveAnswer);
 router.post("/assessment/:id/finalize", finalizeAssessment);
 
 // POST /api/ai/assessment/:id/send-report -> send stored/generated report to email
-router.post("/assessment/:id/send-report", require("../controllers/aiAssessmentController").sendReport);
+router.post("/assessment/:id/send-report", sendReport);
 
 module.exports = router;
 
