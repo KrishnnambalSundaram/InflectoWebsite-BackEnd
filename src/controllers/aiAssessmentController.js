@@ -338,7 +338,7 @@ const sendReport = async (req, res) => {
             <p><strong>Your Score:</strong> ${updatedAssessment.final_score || 0} / 100</p>
             <p><strong>Stage:</strong> ${updatedAssessment.stage || 'N/A'}</p>
             <p>Please find your comprehensive AI Readiness Assessment Report attached to this email.</p>
-            <p>If you have any questions or would like to schedule a consultation, please don't hesitate to reach out.</p>
+            <p>If you have any questions or would like to schedule a consultation, please don't hesitate to reach out by replying to this email.</p>
             <br>
             <p>Best regards,<br>Inflecto Technologies</p>
           </div>
@@ -410,6 +410,11 @@ Assessment Date: ${assessmentDate}
 Observations: ${JSON.stringify(observations)}
 Context: ${JSON.stringify(contextAnswers)}
 
+IMPORTANT INSTRUCTIONS FOR ARRAY FIELDS:
+- "key_observations": Generate 3 items, each 20-25 words. Summarize insights from the scoring answers (Observations field). Analyze the persona, score, and stage to provide specific, actionable observations about the organization's current AI readiness state, strengths, and gaps.
+- "areas_of_opportunity": Generate 3 items, each 20-25 words. Identify specific opportunities based on the persona, score, context answers, and observations. Focus on areas where AI can create measurable value, address identified challenges, gaps, or pain points mentioned in the context answers.
+- "recommended_next_steps": Generate 3 items, each 20-25 words. Provide concrete, actionable next steps tailored to the persona and current stage. Steps should be prioritized, specific, and aligned with the organization's AI maturity level, identified opportunities, and the persona's role (C-Suite focuses on strategy/investment, Manager on workflow/department, Practitioner on tools/tasks).
+
 JSON structure (all fields required):
 {
   "title": "AI Readiness Assessment Report – {{Persona}}",
@@ -420,9 +425,9 @@ JSON structure (all fields required):
     "stage": "{{Stage}}",
     "interpretation": "{{Paragraph}}"
   },
-  "key_observations": ["item1","item2","item3"],
-  "areas_of_opportunity": ["item1","item2","item3"],
-  "recommended_next_steps": ["step1","step2","step3"],
+  "key_observations": ["item1 (20-25 words)","item2 (20-25 words)","item3 (20-25 words)"],
+  "areas_of_opportunity": ["item1 (20-25 words)","item2 (20-25 words)","item3 (20-25 words)"],
+  "recommended_next_steps": ["step1 (20-25 words)","step2 (20-25 words)","step3 (20-25 words)"],
   "why_beginning": "Most organizations realize 10–15% effort savings just by adopting AI in the right sequence. One-size does NOT fit all.",
   "art_benefits": [
     "maps maturity across leadership, data, automation, talent, and governance",

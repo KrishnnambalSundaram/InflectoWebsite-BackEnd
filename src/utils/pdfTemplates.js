@@ -197,7 +197,7 @@ const buildPDFHTMLTemplate = (reportData, assessment, assetsPath = null) => {
   justify-content: center;
   align-items: center;
   background-color: transparent;
-  opacity: 0.4;
+  opacity: 0.6;
   pointer-events: none;
   z-index: 10;
 }
@@ -581,14 +581,10 @@ const buildPDFHTMLTemplate = (reportData, assessment, assetsPath = null) => {
         ${`
         <div class="section">
             <h3 class="section-title">Interested in a full ART assessment?</h3>
-          <p style="margin-bottom: 5px; font-size: 12px; line-height: 1.5;">If you'd like to run a full ART assessment for your organization and receive a detailed AI Readiness Blueprint, write to cs@inflectotechnologies.com.<br/> Mention "ART Assessment – ${assessment.company_name || 'Your Organization'}" in the subject line and our team will guide you through the next steps.</p>
+          <p style="margin-bottom: 5px; font-size: 12px; line-height: 1.5;">If you'd like to run a full ART assessment for your organization and receive a detailed AI Readiness Blueprint, write to cs@inflectotechnologies.com<br/> Mention "ART Assessment – ${assessment.company_name || 'Your Organization'}" in the subject line and our team will guide you through the next steps.</p>
         </div>
         `}
-        
-        <!-- Closing Note -->
-        <div class="section">
-          <h3 class="section-title">Closing Note</h3>
-        </div>
+    
       </div>
       </div>
       <!-- Footer for Page 2 -->
